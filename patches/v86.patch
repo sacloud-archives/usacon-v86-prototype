@@ -1,0 +1,37 @@
+diff --git a/src/uart.js b/src/uart.js
+index 6ae00dc1..4ead710f 100644
+--- a/src/uart.js
++++ b/src/uart.js
+@@ -68,6 +68,7 @@ function UART(cpu, port, bus)
+     this.input = new ByteQueue(4096);
+ 
+     this.current_line = [];
++    this.current_line_bytes = [];
+ 
+     switch(port)
+     {
+@@ -325,17 +326,23 @@ UART.prototype.write_data = function(out_byte)
+         return;
+     }
+ 
+-    var char = String.fromCharCode(out_byte);
++    // ADDED: yamamoto-febc
++    this.bus.send("serial" + this.com + "-output-data", out_byte);
+ 
++    var char = String.fromCharCode(out_byte);
+     this.bus.send("serial" + this.com + "-output-char", char);
+ 
+     this.current_line.push(out_byte);
+ 
+     if(char === "\n")
+     {
++        // ADDED: yamamoto-febc: 末尾の改行を落として渡す
++        this.bus.send("serial" + this.com + "-output-line-data", this.current_line.slice(0,-1));
++
+         const line = String.fromCharCode.apply("", this.current_line).trimRight().replace(/[\x00-\x08\x0b-\x1f\x7f\x80-\xff]/g, "");
+         dbg_log("SERIAL: " + line);
+         this.bus.send("serial" + this.com + "-output-line", String.fromCharCode.apply("", this.current_line));
++
+         this.current_line = [];
+     }
+ };

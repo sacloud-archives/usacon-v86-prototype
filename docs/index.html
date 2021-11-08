@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <title>usacon-v86-prototype</title>
+
+    <link rel="stylesheet" href="v86/xterm.css"/>
+    <script src="v86/xterm.js"></script>
+    <script src="v86/libv86.js"></script>
+    <script src="usacon/keyboard_jp106.js"></script>
+    <script src="usacon/serial_adapter.js"></script>
+    <script src="usacon/sacloud_api_handler.js"></script>
+
+    <script>
+        window.onload = function () {
+            var emulator = window.emulator = new V86Starter({
+                wasm_path: "v86/v86.wasm",
+                memory_size: 128 * 1024 * 1024,
+                bios: {
+                    url: "v86/bios/seabios.bin",
+                },
+                bzimage: {
+                    url: "usacon/usacloud-bzimage.bin",
+                },
+                cmdline: "root=/dev/sr0 rw 3 console=ttyS0 console=tty0",
+                filesystem: {},
+                uart1: true,
+                disable_keyboard: true,
+                autostart: false
+            });
+
+            emulator.serial_adapter = new SerialAdapterXtermJS2(
+                document.getElementById("terminal"),
+                emulator.bus,
+                new SacloudAPIHandler(emulator).Handle
+            );
+
+            emulator.keyboard_adapter = new JPKeyboardAdapter(emulator.bus);
+
+            emulator.add_listener("emulator-loaded", function () {
+                emulator.run();
+            });
+        }
+    </script>
+</head>
+
+<body>
+<span style="display:block">GitHub: <a href="https://github.com/sacloud/usacon-v86-prototype">https://github.com/sacloud/usacon-v86-prototype</a></span>
+<div id="xterm-container">
+    <div id="terminal"></div>
+</div>
+</body>
+
+</html>
