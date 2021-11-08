@@ -22,6 +22,9 @@
                     url: "usacon/usacloud-bzimage.bin",
                 },
                 cmdline: "root=/dev/sr0 rw 3 console=ttyS0 console=tty0",
+                initial_state: {
+                    url: "usacon/initial_state.bin.zst",
+                },
                 filesystem: {},
                 uart1: true,
                 disable_keyboard: true,
@@ -38,6 +41,7 @@
 
             emulator.add_listener("emulator-loaded", function () {
                 emulator.run();
+                emulator.serial0_send("source .profile; history -c\n");
             });
         }
     </script>

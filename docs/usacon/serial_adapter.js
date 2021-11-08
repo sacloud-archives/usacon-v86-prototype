@@ -3,7 +3,6 @@
 function SerialAdapterXtermJS2(element, bus, apiHandler)
 {
     this.element = element;
-    this.started = false;
     this.handler = apiHandler;
 
     if(!window["Terminal"])
@@ -30,15 +29,12 @@ function SerialAdapterXtermJS2(element, bus, apiHandler)
     bus.register("serial1-output-line-data", function(data){
         let line = new TextDecoder().decode(new Uint8Array(data)).trim();
 
-        if (line.length > 0 && this.started) {
+        if (line.length > 0) {
             if (!!this.handler) {
                 this.handler(line);
             }
         }
 
-        if (line === ":::usacloud ready:::") {
-            this.started = true;
-        }
     }, this);
 }
 
